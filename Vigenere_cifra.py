@@ -1,5 +1,7 @@
 from math import gcd
 
+########################################################################################################################
+
 escape = ("\\", "\n", "\r", "\t", "\b", "\f")
 
 alfabeto = ("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u",
@@ -61,6 +63,7 @@ probabilidade_pt = [14.63, 1.04, 3.88, 4.99, 12.57, 1.02, 1.30, 1.28, 6.18, 0.40
 probabilidade_en = [8.167, 1.492, 2.782, 4.253, 12.702, 2.228, 2.015, 6.094, 6.966, 0.153, 0.772, 4.025, 2.406,
                     6.749, 7.507, 1.929, 0.095, 5.987, 6.327, 9.056, 2.758, 0.978, 2.360, 0.150, 1.974, 0.074]
 
+########################################################################################################################
 
 def cripto(msg, senha):
     msg = msg.lower()
@@ -92,33 +95,40 @@ def keyStream(chave, tam_msg):
     else:
         return chave
 
+########################################################################################################################
 
+# função principal que chama as outras para a realização do processo.
 def descryptoMsgSemChave(desafio):
     desafio = desafio.lower()
+    # retira os caracteres especiais e espaços em branco
     msg_sem_caracteres_especiais = ''.join(filter(str.isalnum, desafio))
     tamanho_chave = tamanhoChave(frequenciaOcorrencias(msg_sem_caracteres_especiais))
     lista_porcentagens = descobrindoPorcentagemLetra(msg_sem_caracteres_especiais, tamanho_chave)
     palavra = descobrindoLetra(lista_porcentagens, tamanho_chave)
-    msg_roubada = descruptoDesafio(desafio, palavra)
+    msg_roubada = descriptoDesafio(desafio, palavra)
     return palavra, msg_roubada
 
 
 def frequenciaOcorrencias(msg_sem_caracteres_especiais):
     frequencia_ocorrencias = dict()
+    # move o texto para esquerda
     for x in range(1, len(msg_sem_caracteres_especiais)):
         contador = 0
         quentidade_ocorrencia = 0
+        # grava as ocorrencias de caracteres iguais em um dicionario (deslocamento:ocorrencias)
         for i in range(x, len(msg_sem_caracteres_especiais)):
             if msg_sem_caracteres_especiais[i] == msg_sem_caracteres_especiais[contador]:
                 quentidade_ocorrencia += 1
             contador += 1
         frequencia_ocorrencias[x] = quentidade_ocorrencia
+    # retorna uma tupla organizada pelas linhas com maior ocorrencia de itens iguais
     return sorted(frequencia_ocorrencias.items(), key=lambda x: x[1], reverse=True)
 
 
 def tamanhoChave(frequencia):
     linhas_mais_frequencia = list(sub[0] for sub in frequencia[:5])
     frequencia_mdc = {}
+    # cria um dicionario com mdc da lista toda comparada (mdc:ocorrencia) {5:3, 2:1, 4:2}
     for i in linhas_mais_frequencia:
         for k in linhas_mais_frequencia:
             mdc = gcd(i, k)
@@ -126,11 +136,13 @@ def tamanhoChave(frequencia):
                 frequencia_mdc[mdc] = 1
             else:
                 frequencia_mdc[mdc] += 1 if mdc != 1 else 0
+    # retorna o mdc que teve mais ocorrencias
     return max(frequencia_mdc, key=frequencia_mdc.get)
 
 
 def descobrindoPorcentagemLetra(msg_sem_caracteres_especiais, tamanho_chave):
     lista_ocorrencia_letras = []
+    # cria uma lista com listas de letras em cada subposição delimitada pela chave (tamanho da chave = 5, sublistas = 5)
     for i in range(len(msg_sem_caracteres_especiais)):
         posicao = i % tamanho_chave
         if posicao >= len(lista_ocorrencia_letras):
@@ -139,6 +151,7 @@ def descobrindoPorcentagemLetra(msg_sem_caracteres_especiais, tamanho_chave):
             lista_ocorrencia_letras[posicao].append(msg_sem_caracteres_especiais[i])
 
     lista_ocorrencia_letras_porcentagem = []
+    # cria uma lista com a poscentagem de cada letra do alfabeto em ordem
     for t in lista_ocorrencia_letras:
         letra_ocorrencia = []
         for k in alfabeto:
@@ -153,6 +166,7 @@ def descobrindoLetra(lista_porcentagens, tamanho_palavra):
 
     palavra = ""
     lista_somas = []
+    # crio uma lista de listas, dentro de cada sublista tenho a soma em ordem de deslocamento
     for posicao in range(tamanho_palavra):
         lista = []
         for i in range(len(lista_porcentagens[posicao])):
@@ -163,16 +177,18 @@ def descobrindoLetra(lista_porcentagens, tamanho_palavra):
             lista.append(soma)
         lista_somas.append(lista)
 
+    # pego a posição da maior soma, que corresponde o deslocamento, e procuro a posição no alfabeto.
     for t in lista_somas:
         palavra += alfabeto[t.index(max(t))]
 
     return palavra
 
 
-def descruptoDesafio(desafio, palavra):
+def descriptoDesafio(desafio, palavra):
     msg_roubada = ""
     chave_cifra = keyStream(palavra, len(desafio))
     contador = 0
+    # percorre a chave conforme percorre o texto, porém pulando os espaços e caracteres especiais.
     for letra in desafio:
         if letra in alfabeto:
             posicao_msg = alfabeto.index(letra) - alfabeto.index(
@@ -182,6 +198,8 @@ def descruptoDesafio(desafio, palavra):
         else:
             msg_roubada += letra
     return msg_roubada
+
+########################################################################################################################
 
 opcao = int(input("Digite qual opção vc deseja:\n1- Criptografar e Descriptografar\n2- Ataque\n"))
 if opcao == 1:
@@ -211,6 +229,6 @@ elif opcao == 2:
     linguagem = int(input("Digite o número da opção vc escolhe:\n1- pt (portugues)\n2- en (ingles)\n"))
     palavra, msg_roubada = descryptoMsgSemChave(desafio)
     print("\n" + "Palavra encontrada: " + palavra)
-    print("Linguagem escolida: " + "portugues" if linguagem == 1 else "ingles")
+    print("Linguagem escolida: " + ("portugues" if linguagem == 1 else "ingles"))
     print("Alfabeto usado: " + ''.join(alfabeto))
     print("Mensagem descriptografada:\n\n" + msg_roubada)
