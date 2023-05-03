@@ -1,13 +1,18 @@
 from math import gcd
 
-alfabeto = ("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u",
-            "v", "w", "x", "y", "z", "á", "ã", "à", "â", "ç", "è", "é", "ê", "í", "ì", "ı", "ô", "õ", "ò", "ó", "ù",
-            "ú", " ", '”', '"', "'", "“", "‘", "!", "@", "#", "$", "%", "&", "*", "(", ")", "_", "-", "+", "=", "{",
-            "[", "}", "]", "|", "<", ",", ">", ".", ":", ";", "?", "/", "0", "1", "2", "3", "4", "5", "6", "7", "8",
-            "9", "\\", "\n", "\r", "\t", "\b", "\f")
+escape = ("\\", "\n", "\r", "\t", "\b", "\f")
 
-alfabeto_decifrando_sem_chave = ("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q",
-                                 "r", "s", "t", "u", "v", "w", "x", "y", "z")
+alfabeto = ("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u",
+            "v", "w", "x", "y", "z")
+
+caracteres_especiais = ("á", "ã", "à", "â", "ç", "è", "é", "ê", "í", "ì", "ı", "ô", "õ", "ò", "ó", "ù", "ú", " ", '”',
+                        '"', "'", "“", "‘", "!", "@", "#", "$", "%", "&", "*", "(", ")", "_", "-", "+", "=", "{", "[",
+                        "}", "]", "|", "<", ",", ">", ".", ":", ";", "?", "/")
+
+numeros = ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9")
+
+alfabeto_completo = alfabeto + caracteres_especiais + numeros + escape
+
 
 msg_teste1 = """rvgllakieg tye tirtucatzoe.  whvnvvei i
 winu mpsecf xronieg giid abfuk thv mfuty; wyenvvvr ik ij a drmg,
@@ -59,14 +64,13 @@ probabilidade_en = [8.167, 1.492, 2.782, 4.253, 12.702, 2.228, 2.015, 6.094, 6.9
 
 def cripto(msg, senha):
     msg = msg.lower()
-    msg = msg[1:]
     msg_crypto = ""
     chave_cifra = keyStream(senha, len(msg))
     for posicao in range(len(msg)):
-        posicao_alfabeto = int(alfabeto.index(msg[posicao]) + alfabeto.index(chave_cifra[posicao]))
-        if posicao_alfabeto > len(alfabeto) - 1:
-            posicao_alfabeto -= len(alfabeto)
-        msg_crypto += alfabeto[posicao_alfabeto]
+        posicao_alfabeto = int(alfabeto_completo.index(msg[posicao]) + alfabeto_completo.index(chave_cifra[posicao]))
+        if posicao_alfabeto > len(alfabeto_completo) - 1:
+            posicao_alfabeto -= len(alfabeto_completo)
+        msg_crypto += alfabeto_completo[posicao_alfabeto]
     return msg_crypto
 
 
@@ -74,8 +78,8 @@ def descrypto(msg_crypto, senha):
     msg = ""
     chave_cifra = keyStream(senha, len(msg_crypto))
     for posicao in range(len(msg_crypto)):
-        posicao_msg = alfabeto.index(msg_crypto[posicao]) - alfabeto.index(chave_cifra[posicao])
-        msg += alfabeto[posicao_msg]
+        posicao_msg = alfabeto_completo.index(msg_crypto[posicao]) - alfabeto_completo.index(chave_cifra[posicao])
+        msg += alfabeto_completo[posicao_msg]
     return msg
 
 
@@ -137,7 +141,7 @@ def descobrindoPorcentagemLetra(msg_sem_caracteres_especiais, tamanho_chave):
     lista_ocorrencia_letras_porcentagem = []
     for t in lista_ocorrencia_letras:
         letra_ocorrencia = []
-        for k in alfabeto_decifrando_sem_chave:
+        for k in alfabeto:
             letra_ocorrencia.append((t.count(k) / len(t)))
         lista_ocorrencia_letras_porcentagem.append(letra_ocorrencia)
 
@@ -155,12 +159,12 @@ def descobrindoLetra(lista_porcentagens, tamanho_palavra):
             soma = 0
             for k in range(len(linguagem_escolhida)):
                 soma += linguagem_escolhida[k] * lista_porcentagens[posicao][
-                    (i + k) % len(alfabeto_decifrando_sem_chave)]
+                    (i + k) % len(alfabeto)]
             lista.append(soma)
         lista_somas.append(lista)
 
     for t in lista_somas:
-        palavra += alfabeto_decifrando_sem_chave[t.index(max(t))]
+        palavra += alfabeto[t.index(max(t))]
 
     return palavra
 
@@ -170,11 +174,11 @@ def descruptoDesafio(desafio, palavra):
     chave_cifra = keyStream(palavra, len(desafio))
     contador = 0
     for letra in desafio:
-        if letra in alfabeto_decifrando_sem_chave:
-            posicao_msg = alfabeto_decifrando_sem_chave.index(letra) - alfabeto_decifrando_sem_chave.index(
+        if letra in alfabeto:
+            posicao_msg = alfabeto.index(letra) - alfabeto.index(
                 chave_cifra[contador])
             contador += 1
-            msg_roubada += alfabeto_decifrando_sem_chave[posicao_msg]
+            msg_roubada += alfabeto[posicao_msg]
         else:
             msg_roubada += letra
     return msg_roubada
@@ -183,18 +187,24 @@ opcao = int(input("Digite qual opção vc deseja:\n1- Criptografar e Descriptogr
 if opcao == 1:
     msg = ''
     linha = ''
-    print("Digite a sua mensagem: (ao final, de um enter e digite '.,;')\n")
-    while linha != ".,;":
-        msg += '\n' + linha if linha != "" else ''
+    print("Digite a sua mensagem: (ao final do texto digite '.,;')\n")
+    # faz aceitar o texto não importanto quantos paragrafos tenha, deis que coloque '.,;' quando acabar.
+    while linha[-3:] != ".,;":
         linha = input()
+        msg += '\n' + linha
+    # tira os espaços em branco antes do inicio do texto e retira o '.,;' do final.
+    for i in msg:
+        if i not in escape:
+            msg = msg[msg.index(i):-3]
+            break
     senha = input("Digite a chave que irá códificar:\n")
     msg_crypto = cripto(msg, senha)
     msg_original = descrypto(msg_crypto, senha)
     print("\n" + "Senha digitada: " + senha)
-    print("Alfabeto usado: " + ''.join(alfabeto))
-    print("Texto digitado é igual ao decifrado: " + str(msg[1:].lower() == msg_original))
+    print("Alfabeto usado: " + ''.join(alfabeto_completo))
+    print("Texto digitado é igual ao decifrado: " + str(msg.lower() == msg_original))
     print("Msg criptografada:\n\n" + msg_crypto)
-    print("\nMsg original pegando a descriptografando usando a chave passada:\n\n" + msg_original)
+    print("\nMsg criptografada descriptografada usando a chave passada:\n\n" + msg_original)
 elif opcao == 2:
     n_desafio = int(input("Digite qual desafio vc deseja:\n1- desafio1.txt\n2- desafio2.txt\n"))
     desafio = msg_teste1 if n_desafio == 1 else msg_teste2
@@ -202,5 +212,5 @@ elif opcao == 2:
     palavra, msg_roubada = descryptoMsgSemChave(desafio)
     print("\n" + "Palavra encontrada: " + palavra)
     print("Linguagem escolida: " + "portugues" if linguagem == 1 else "ingles")
-    print("Alfabeto usado: " + ''.join(alfabeto_decifrando_sem_chave))
+    print("Alfabeto usado: " + ''.join(alfabeto))
     print("Mensagem descriptografada:\n\n" + msg_roubada)
