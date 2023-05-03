@@ -4,7 +4,7 @@ alfabeto = ("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n"
             "v", "w", "x", "y", "z", "á", "ã", "à", "â", "ç", "è", "é", "ê", "í", "ì", "ı", "ô", "õ", "ò", "ó", "ù",
             "ú", " ", '”', '"', "'", "“", "‘", "!", "@", "#", "$", "%", "&", "*", "(", ")", "_", "-", "+", "=", "{",
             "[", "}", "]", "|", "<", ",", ">", ".", ":", ";", "?", "/", "0", "1", "2", "3", "4", "5", "6", "7", "8",
-            "9")
+            "9", "\\", "\n", "\r", "\t", "\b", "\f")
 
 alfabeto_decifrando_sem_chave = ("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q",
                                  "r", "s", "t", "u", "v", "w", "x", "y", "z")
@@ -59,6 +59,7 @@ probabilidade_en = [8.167, 1.492, 2.782, 4.253, 12.702, 2.228, 2.015, 6.094, 6.9
 
 def cripto(msg, senha):
     msg = msg.lower()
+    msg = msg[1:]
     msg_crypto = ""
     chave_cifra = keyStream(senha, len(msg))
     for posicao in range(len(msg)):
@@ -180,12 +181,18 @@ def descruptoDesafio(desafio, palavra):
 
 opcao = int(input("Digite qual opção vc deseja:\n1- Criptografar e Descriptografar\n2- Ataque\n"))
 if opcao == 1:
-    msg = input("Digite a sua mensagem em 1 linha: (caso queira, deixe os caracteres de escape)\n")
+    msg = ''
+    linha = ''
+    print("Digite a sua mensagem: (ao final, de um enter e digite '.,;')\n")
+    while linha != ".,;":
+        msg += '\n' + linha if linha != "" else ''
+        linha = input()
     senha = input("Digite a chave que irá códificar:\n")
     msg_crypto = cripto(msg, senha)
     msg_original = descrypto(msg_crypto, senha)
-    print("\n" + "Palavra encontrada: " + senha)
+    print("\n" + "Senha digitada: " + senha)
     print("Alfabeto usado: " + ''.join(alfabeto))
+    print("Texto digitado é igual ao decifrado: " + str(msg[1:].lower() == msg_original))
     print("Msg criptografada:\n\n" + msg_crypto)
     print("\nMsg original pegando a descriptografando usando a chave passada:\n\n" + msg_original)
 elif opcao == 2:
