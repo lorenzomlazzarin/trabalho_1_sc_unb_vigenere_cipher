@@ -1,9 +1,6 @@
 from math import gcd
 
 ########################################################################################################################
-
-escape = ("\\", "\n", "\r", "\t", "\b", "\f")
-
 alfabeto = ("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u",
             "v", "w", "x", "y", "z")
 
@@ -12,6 +9,8 @@ caracteres_especiais = ("á", "ã", "à", "â", "ç", "è", "é", "ê", "í", "�
                         "}", "]", "|", "<", ",", ">", ".", ":", ";", "?", "/")
 
 numeros = ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9")
+
+escape = ("\\", "\n", "\r", "\t", "\b", "\f")
 
 alfabeto_completo = alfabeto + caracteres_especiais + numeros + escape
 
@@ -103,8 +102,10 @@ def descryptoMsgSemChave(desafio):
     # retira os caracteres especiais e espaços em branco
     msg_sem_caracteres_especiais = ''.join(filter(str.isalnum, desafio))
     tamanho_chave = tamanhoChave(frequenciaOcorrencias(msg_sem_caracteres_especiais))
+    #### -------------------------------------------------------------------------- ###
     lista_porcentagens = descobrindoPorcentagemLetra(msg_sem_caracteres_especiais, tamanho_chave)
     palavra = descobrindoLetra(lista_porcentagens, tamanho_chave)
+    ### --------------------------------------------------------------------------- ###
     msg_roubada = descriptoDesafio(desafio, palavra)
     return palavra, msg_roubada
 
@@ -141,21 +142,13 @@ def tamanhoChave(frequencia):
 
 
 def descobrindoPorcentagemLetra(msg_sem_caracteres_especiais, tamanho_chave):
-    lista_ocorrencia_letras = []
     # cria uma lista com listas de letras em cada subposição delimitada pela chave (tamanho da chave = 5, sublistas = 5)
-    for i in range(len(msg_sem_caracteres_especiais)):
-        posicao = i % tamanho_chave
-        if posicao >= len(lista_ocorrencia_letras):
-            lista_ocorrencia_letras.append([msg_sem_caracteres_especiais[i]])
-        else:
-            lista_ocorrencia_letras[posicao].append(msg_sem_caracteres_especiais[i])
+    lista_ocorrencia_letras = [msg_sem_caracteres_especiais[letra::tamanho_chave] for letra in range(tamanho_chave)]
 
-    lista_ocorrencia_letras_porcentagem = []
     # cria uma lista com a poscentagem de cada letra do alfabeto em ordem
+    lista_ocorrencia_letras_porcentagem = []
     for t in lista_ocorrencia_letras:
-        letra_ocorrencia = []
-        for k in alfabeto:
-            letra_ocorrencia.append((t.count(k) / len(t)))
+        letra_ocorrencia = [(t.count(k) * 100) / len(t) for k in alfabeto]
         lista_ocorrencia_letras_porcentagem.append(letra_ocorrencia)
 
     return lista_ocorrencia_letras_porcentagem
@@ -164,20 +157,17 @@ def descobrindoPorcentagemLetra(msg_sem_caracteres_especiais, tamanho_chave):
 def descobrindoLetra(lista_porcentagens, tamanho_palavra):
     linguagem_escolhida = probabilidade_pt if linguagem == 1 else probabilidade_en
 
-    palavra = ""
-    lista_somas = []
     # crio uma lista de listas, dentro de cada sublista tenho a soma em ordem de deslocamento
+    lista_somas = []
     for posicao in range(tamanho_palavra):
         lista = []
         for i in range(len(lista_porcentagens[posicao])):
-            soma = 0
-            for k in range(len(linguagem_escolhida)):
-                soma += linguagem_escolhida[k] * lista_porcentagens[posicao][
-                    (i + k) % len(alfabeto)]
+            soma = sum([linguagem_escolhida[k] * lista_porcentagens[posicao][(i + k) % len(alfabeto)] for k in range(len(linguagem_escolhida))])
             lista.append(soma)
         lista_somas.append(lista)
 
     # pego a posição da maior soma, que corresponde o deslocamento, e procuro a posição no alfabeto.
+    palavra = ""
     for t in lista_somas:
         palavra += alfabeto[t.index(max(t))]
 
@@ -228,7 +218,7 @@ elif opcao == 2:
     desafio = msg_teste1 if n_desafio == 1 else msg_teste2
     linguagem = int(input("Digite o número da opção vc escolhe:\n1- pt (portugues)\n2- en (ingles)\n"))
     palavra, msg_roubada = descryptoMsgSemChave(desafio)
-    print("\n" + "Palavra encontrada: " + palavra)
+    print("\nPalavra encontrada: " + palavra)
     print("Linguagem escolida: " + ("portugues" if linguagem == 1 else "ingles"))
     print("Alfabeto usado: " + ''.join(alfabeto))
     print("Mensagem descriptografada:\n\n" + msg_roubada)
