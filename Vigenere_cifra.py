@@ -1,6 +1,9 @@
 from math import gcd
 
 ########################################################################################################################
+#####################################################  CONSTANTES  #####################################################
+########################################################################################################################
+
 alfabeto = ("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u",
             "v", "w", "x", "y", "z")
 
@@ -14,6 +17,10 @@ escape = ("\\", "\n", "\r", "\t", "\b", "\f")
 
 alfabeto_completo = alfabeto + caracteres_especiais + numeros + escape
 
+probabilidade_pt = [14.63, 1.04, 3.88, 4.99, 12.57, 1.02, 1.30, 1.28, 6.18, 0.40, 0.02, 2.78, 4.74,
+                    5.05, 10.73, 2.52, 1.20, 6.53, 7.81, 4.34, 4.63, 1.67, 0.01, 0.21, 0.01, 0.47]
+probabilidade_en = [8.167, 1.492, 2.782, 4.253, 12.702, 2.228, 2.015, 6.094, 6.966, 0.153, 0.772, 4.025, 2.406,
+                    6.749, 7.507, 1.929, 0.095, 5.987, 6.327, 9.056, 2.758, 0.978, 2.360, 0.150, 1.974, 0.074]
 
 msg_teste1 = """rvgllakieg tye tirtucatzoe.  whvnvvei i
 winu mpsecf xronieg giid abfuk thv mfuty; wyenvvvr ik ij a drmg,
@@ -57,11 +64,8 @@ msg_teste2 = "tpsja kexis ttgztpb wq ssmil tfdxf vsetw ytafrttw btzf pcbroxdzo z
              "meoieyme-xd. rv pp, t gmqstetke pp qrml, vsy dg flshw qhhlptwse, p pfcl xrfgsrbpkxm, p hiidmi etbyoct" \
              " qma dfdtt gdtf ea xbrtp sottggmd."
 
-probabilidade_pt = [14.63, 1.04, 3.88, 4.99, 12.57, 1.02, 1.30, 1.28, 6.18, 0.40, 0.02, 2.78, 4.74,
-                    5.05, 10.73, 2.52, 1.20, 6.53, 7.81, 4.34, 4.63, 1.67, 0.01, 0.21, 0.01, 0.47]
-probabilidade_en = [8.167, 1.492, 2.782, 4.253, 12.702, 2.228, 2.015, 6.094, 6.966, 0.153, 0.772, 4.025, 2.406,
-                    6.749, 7.507, 1.929, 0.095, 5.987, 6.327, 9.056, 2.758, 0.978, 2.360, 0.150, 1.974, 0.074]
-
+########################################################################################################################
+########################################  CIFRANDO E DECIFRANDO DO MEU JEITO  ##########################################
 ########################################################################################################################
 
 def cripto(msg, senha):
@@ -95,6 +99,8 @@ def keyStream(chave, tam_msg):
         return chave
 
 ########################################################################################################################
+#######################################################  ATAQUE  #######################################################
+########################################################################################################################
 
 # função principal que chama as outras para a realização do processo.
 def descryptoMsgSemChave(desafio):
@@ -102,10 +108,8 @@ def descryptoMsgSemChave(desafio):
     # retira os caracteres especiais e espaços em branco
     msg_sem_caracteres_especiais = ''.join(filter(str.isalnum, desafio))
     tamanho_chave = tamanhoChave(frequenciaOcorrencias(msg_sem_caracteres_especiais))
-    #### -------------------------------------------------------------------------- ###
     lista_porcentagens = descobrindoPorcentagemLetra(msg_sem_caracteres_especiais, tamanho_chave)
     palavra = descobrindoLetra(lista_porcentagens, tamanho_chave)
-    ### --------------------------------------------------------------------------- ###
     msg_roubada = descriptoDesafio(desafio, palavra)
     return palavra, msg_roubada
 
@@ -167,11 +171,11 @@ def descobrindoLetra(lista_porcentagens, tamanho_palavra):
         lista_somas.append(lista)
 
     # pego a posição da maior soma, que corresponde o deslocamento, e procuro a posição no alfabeto.
-    palavra = ""
+    palavra_chave = ""
     for t in lista_somas:
-        palavra += alfabeto[t.index(max(t))]
+        palavra_chave += alfabeto[t.index(max(t))]
 
-    return palavra
+    return palavra_chave
 
 
 def descriptoDesafio(desafio, palavra):
@@ -190,11 +194,12 @@ def descriptoDesafio(desafio, palavra):
     return msg_roubada
 
 ########################################################################################################################
+##############################################  INTERAÇÃO COM O USUARIO  ###############################################
+########################################################################################################################
 
 opcao = int(input("Digite qual opção vc deseja:\n1- Criptografar e Descriptografar\n2- Ataque\n"))
 if opcao == 1:
-    msg = ''
-    linha = ''
+    msg, linha = '', ''
     print("Digite a sua mensagem: (ao final do texto digite '.,;')\n")
     # faz aceitar o texto não importanto quantos paragrafos tenha, deis que coloque '.,;' quando acabar.
     while linha[-3:] != ".,;":
