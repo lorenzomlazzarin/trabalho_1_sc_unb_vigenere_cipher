@@ -120,7 +120,7 @@ def frequenciaOcorrencias(msg_sem_caracteres_especiais):
     for x in range(1, len(msg_sem_caracteres_especiais)):
         contador = 0
         quentidade_ocorrencia = 0
-        # grava as ocorrencias de caracteres iguais em um dicionario (deslocamento:ocorrencias)
+        # grava as ocorrencias de caracteres iguais em dicionário (deslocamento:ocorrencias)
         for i in range(x, len(msg_sem_caracteres_especiais)):
             if msg_sem_caracteres_especiais[i] == msg_sem_caracteres_especiais[contador]:
                 quentidade_ocorrencia += 1
@@ -133,7 +133,7 @@ def frequenciaOcorrencias(msg_sem_caracteres_especiais):
 def tamanhoChave(frequencia):
     linhas_mais_frequencia = list(sub[0] for sub in frequencia[:5])
     frequencia_mdc = {}
-    # cria um dicionario com mdc da lista toda comparada (mdc:ocorrencia) {5:3, 2:1, 4:2}
+    # cria um dicionário com mdc da lista toda comparada (mdc:ocorrencia) {5:3, 2:1, 4:2}
     for i in linhas_mais_frequencia:
         for k in linhas_mais_frequencia:
             mdc = gcd(i, k)
