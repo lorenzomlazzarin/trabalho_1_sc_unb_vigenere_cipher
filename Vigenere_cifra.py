@@ -205,7 +205,7 @@ if opcao == 1:
     while linha[-3:] != ".,;":
         linha = input()
         msg += '\n' + linha
-    # tira os espaços em branco antes do inicio do texto e retira o '.,;' do final.
+    # tira os espaços em branco antes do início do texto e retira o '.,;' do final.
     for i in msg:
         if i not in escape:
             msg = msg[msg.index(i):-3]
@@ -219,11 +219,24 @@ if opcao == 1:
     print("Msg criptografada:\n\n" + msg_crypto)
     print("\nMsg criptografada descriptografada usando a chave passada:\n\n" + msg_original)
 elif opcao == 2:
-    n_desafio = int(input("Digite qual desafio vc deseja:\n1- desafio1.txt\n2- desafio2.txt\n"))
-    desafio = msg_teste1 if n_desafio == 1 else msg_teste2
+    subopcao = int(input("Digite qual opção vc deseja:\n1- Escolher um desafio do professor\n2- Digitar um desafio\n"))
+    if subopcao == 1:
+        n_desafio = int(input("Digite qual desafio vc deseja:\n1- desafio1.txt\n2- desafio2.txt\n"))
+        desafio = msg_teste1 if n_desafio == 1 else msg_teste2
+    else:
+        print("Digite a sua mensagem: (ao final do texto digite '.,;')\n")
+        # faz aceitar o texto não importanto quantos paragrafos tenha, deis que coloque '.,;' quando acabar.
+        desafio = ""
+        while desafio[-3:] != ".,;":
+            linha = input()
+            desafio += '\n' + linha
+        # retira o '.,;' do final.
+        desafio = desafio[:-3]
     linguagem = int(input("Digite o número da opção vc escolhe:\n1- pt (portugues)\n2- en (ingles)\n"))
     palavra, msg_roubada = descryptoMsgSemChave(desafio)
     print("\nPalavra encontrada: " + palavra)
     print("Linguagem escolida: " + ("portugues" if linguagem == 1 else "ingles"))
     print("Alfabeto usado: " + ''.join(alfabeto))
     print("Mensagem descriptografada:\n\n" + msg_roubada)
+else:
+    print("De uma olhadinha melhor nas opções. Programa encerrado :)")
