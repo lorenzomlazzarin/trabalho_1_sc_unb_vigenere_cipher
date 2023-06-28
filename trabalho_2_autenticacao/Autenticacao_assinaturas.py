@@ -83,7 +83,8 @@ def sub_bytes (blocos_16):
         nova_mensagem = []
         for i in range(len(blocos_16[t])):
             nova_mensagem.append(s_box[blocos_16[t][i]])
-        bloco_nova_mensagem.append(b''.join(nova_mensagem))
+        bloco_nova_mensagem.append(bytes(nova_mensagem))
+
 
     return bloco_nova_mensagem
 
