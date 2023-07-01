@@ -70,14 +70,6 @@ def galois_mul(a, b):
         b >>= 1
     return p % 256
 
-# Resto do código ...
-
-
-
-
-
-# Resto do código ...
-
 
 # Chave de 128 bits
 key = b'SuaChaveDe128b'
