@@ -84,11 +84,40 @@ def sub_bytes (blocos_16):
         for i in range(len(blocos_16[t])):
             nova_mensagem.append(s_box[blocos_16[t][i]])
         bloco_nova_mensagem.append(bytes(nova_mensagem))
-
-
     return bloco_nova_mensagem
 
+def shift_rows_alt(blocos_16):
+    blocos_novos = []
+    posicao = {1:5, 2:10, 3:15, 4:8, 6:14, 7:11, 9:13}
+    for bloco in blocos_16:
+        bloco = bytearray(bloco)
+        for i in posicao:
+            bloco[i], bloco[posicao[i]] = bloco[posicao[i]], bloco[i]
+        blocos_novos.append(bytes(bloco))
+    return blocos_novos
 
+def mix_columns(blocos_16):
+    mul2 = [2, 3, 1, 1]
+    mul3 = [3, 2, 1, 1]
+
+    print(blocos_16)
+    novos_blocos = []
+    for block in blocos_16:
+        mixed_block = [0] * 16
+
+        for col in range(4):
+            s0 = block[col]
+            s1 = block[col + 4]
+            s2 = block[col + 8]
+            s3 = block[col + 12]
+
+            mixed_block[col] = (mul2[s0 >> 4] ^ mul3[s1 >> 4] ^ s2 ^ s3)
+            mixed_block[col + 4] = (s0 ^ mul2[s1 >> 4] ^ mul3[s2 >> 4] ^ s3)
+            mixed_block[col + 8] = (s0 ^ s1 ^ mul2[s2 >> 4] ^ mul3[s3 >> 4])
+            mixed_block[col + 12] = (mul3[s0 >> 4] ^ s1 ^ s2 ^ mul2[s3 >> 4])
+        novos_blocos.append(mixed_block)
+    print(novos_blocos)
+    return novos_blocos
 
 ########################################################################################################################
 ################################################# Interface Usuario ####################################################
@@ -96,11 +125,16 @@ def sub_bytes (blocos_16):
 
 # parte 1
 chave_gerada = gerador_chave()
-texto_bytes = bytes(input("Digite aqui o texto a ser criptografado:\n"), 'utf-8')
+if (int(input("1- texto já gravado\n2- digitar texto\n")) == 2):
+    texto_bytes = bytes(input("Digite aqui o texto a ser criptografado:\n"), 'utf-8')
+else:
+    texto_bytes = b'0123456789abcdefghijklmno'
 blocos_16 = dividir_blocos_16_bytes(texto_bytes)
 lista_chaves = expancao_chave(chave_gerada)
 sub_bytes(blocos_16)
 add_round_key(blocos_16, lista_chaves[0])
+shift_rows_alt(blocos_16)
+mix_columns(blocos_16)
 print("Essa é a sua chave gerada:", chave_gerada)
 print(texto_bytes)
 print(blocos_16)
