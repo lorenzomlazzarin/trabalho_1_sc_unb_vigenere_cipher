@@ -37,26 +37,24 @@ def dividir_blocos_16_bytes(texto_bytes):
         lista_bytes[len(lista_bytes) - 1] = lista_bytes[len(lista_bytes) - 1] + incremento
     return lista_bytes
 
-def expancao_chave(chave):
-    # Número total de palavras na expansão de chave
-
-    # Palavras-chave iniciais
+def expancao_chave(chave, counter=0):
     round_constants = [1, 2, 4, 8, 16, 32, 64, 128, 27, 54]
-    palavras = [chave[i:i+4] for i in range(0, len(chave), 4)]
+    palavras = [chave[i:i + 4] for i in range(0, len(chave), 4)]
 
-    # Gerar palavras-chave adicionais
-    for i in range(4, 44): # Para uma chave de 4 bytes
+    for i in range(4, 44):
         if i % 4 == 0:
+            # Atualiza o contador em Galois
+            counter = galois_counter(counter)
+
             palavra = palavras[i-1]
             palavra = [palavra[1], palavra[2], palavra[3], palavra[0]]  # Rotacionar palavra
             palavra = [s_box[b] for b in palavra]  # Substituir usando S-Box
-            palavra[0] ^= round_constants[i//4 - 1]  # Realizar XOR com constante de rodada
+            palavra[0] ^= round_constants[i//4 - 1] ^ counter  # Realizar XOR com constante de rodada e contador
         else:
             palavra = [a ^ b for a, b in zip(palavras[i-4], palavras[i-1])]  # Realizar XOR com palavra anterior
 
         palavras.append(palavra)
 
-    # Agrupar palavras em subchaves de 16 bytes
     subchaves = []
     for i in range(0, 44, 4):
         try:
@@ -64,12 +62,13 @@ def expancao_chave(chave):
         except:
             lista = palavras[i:i + 4]
             for t in range(4):
-                 lista[t] = bytes(lista[t])
+                lista[t] = bytes(lista[t])
             juncaobytes = b''.join(lista)
 
         subchaves.append(juncaobytes)
 
     return subchaves
+
 
 def add_round_key(blocos_16, chave):
     msg_cifrada = []
@@ -113,6 +112,13 @@ def mix_columns(blocks):
 
         mixed_blocks.append(bytes(mixed_block))
     return mixed_blocks
+
+def galois_counter(counter):
+    r = (counter & 0x80)  # Verifica se o bit mais significativo é 1
+    counter = (counter << 1) & 0xFF  # Desloca o contador para a esquerda e descarta o bit mais significativo
+    if r != 0:
+        counter ^= 0x1B  # Realiza a operação XOR com o polinômio irreducível (0x1B) em Galois
+    return counter
 
 ########################################################################################################################
 ################################################# Interface Usuario ####################################################
