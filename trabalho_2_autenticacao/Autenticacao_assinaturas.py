@@ -21,7 +21,7 @@ s_box = [
         0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16
 ]
 
-################################################# funções ##############################################################
+############################################## funções crifrar #########################################################
 
 #gera chave 16 bytes ou 128 bits
 def gerador_chave():
@@ -36,6 +36,13 @@ def dividir_blocos_16_bytes(texto_bytes):
         incremento = b"|" * (16 - tamanho)
         lista_bytes[len(lista_bytes) - 1] = lista_bytes[len(lista_bytes) - 1] + incremento
     return lista_bytes
+
+def galois_counter(counter):
+    r = (counter & 0x80)  # Verifica se o bit mais significativo é 1
+    counter = (counter << 1) & 0xFF  # Desloca o contador para a esquerda e descarta o bit mais significativo
+    if r != 0:
+        counter ^= 0x1B  # Realiza a operação XOR com o polinômio irreducível (0x1B) em Galois
+    return counter
 
 def expancao_chave(chave, counter=0):
     round_constants = [1, 2, 4, 8, 16, 32, 64, 128, 27, 54]
@@ -113,37 +120,38 @@ def mix_columns(blocks):
         mixed_blocks.append(bytes(mixed_block))
     return mixed_blocks
 
-def galois_counter(counter):
-    r = (counter & 0x80)  # Verifica se o bit mais significativo é 1
-    counter = (counter << 1) & 0xFF  # Desloca o contador para a esquerda e descarta o bit mais significativo
-    if r != 0:
-        counter ^= 0x1B  # Realiza a operação XOR com o polinômio irreducível (0x1B) em Galois
-    return counter
+def cifrador(texto_bytes, lista_chaves):
+    bloco_16 = dividir_blocos_16_bytes(texto_bytes)
+    block = add_round_key(bloco_16, lista_chaves[0])
+
+    for i in range(10):
+        block = sub_bytes(block)
+        block = shift_rows_alt(block)
+        if (i == 9):
+            block = mix_columns(block)
+        block = add_round_key(block, lista_chaves[i + 1])
+
+    return b''.join(block)
+
+############################################# funções decifrar #########################################################
+
 
 ########################################################################################################################
 ################################################# Interface Usuario ####################################################
 ########################################################################################################################
 
 if (int(input("1- texto já gravado\n2- digitar texto\n")) == 2):
-    texto_bytes = bytes(input("Digite aqui o texto a ser criptografado:\n"), 'utf-8')
+    texto_input_bytes = bytes(input("Digite aqui o texto a ser criptografado:\n"), 'utf-8')
 else:
-    texto_bytes = b'0123456789abcdefghijklmno'
+    texto_input_bytes = b'0123456789abcdefghijklmno'
 
 chave_gerada = gerador_chave()
 subchaves = expancao_chave(chave_gerada)
 
-bloco_16 = dividir_blocos_16_bytes(texto_bytes)
-block = add_round_key(bloco_16, subchaves[0])
-
-for i in range(10):
-        block = sub_bytes(block)
-        block = shift_rows_alt(block)
-        if (i == 9):
-            block = mix_columns(block)
-        block = add_round_key(block, subchaves[i+1])
-
-texto_cifrado = b''.join(block)
+texto_cifrado = cifrador(texto_input_bytes, subchaves)
 
 print("Chave gerada:", chave_gerada)
 print("Chaves da expanção:", subchaves)
 print("Texto cifrado:", texto_cifrado)
+
+texto_decifrado = "a"
