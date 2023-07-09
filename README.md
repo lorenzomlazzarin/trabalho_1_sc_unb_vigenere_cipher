@@ -12,7 +12,7 @@ Alunos:
 
 Entregas:
 * trabalho 1: 06/05/2023
-* trabalho 2: 03/07/2023
+* trabalho 2: 10/07/2023
 
 Repositorio: https://github.com/lorenzomlazzarin/trabalhos_sc_unb_2023-1
 
