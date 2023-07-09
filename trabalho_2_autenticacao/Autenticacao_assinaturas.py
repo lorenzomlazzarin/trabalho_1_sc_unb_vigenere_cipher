@@ -75,7 +75,7 @@ def add_round_key(blocos_16, chave):
     msg_cifrada = []
     for t in range(len(blocos_16)):
         msg_cifrada.append(bytes([blocos_16[t][i] ^ chave[i] for i in range(16)]))
-    return b''.join(msg_cifrada)
+    return msg_cifrada
 
 def sub_bytes (blocos_16):
     bloco_nova_mensagem = []
@@ -96,46 +96,48 @@ def shift_rows_alt(blocos_16):
         blocos_novos.append(bytes(bloco))
     return blocos_novos
 
-def mix_columns(blocos_16):
-    mul2 = [2, 3, 1, 1]
-    mul3 = [3, 2, 1, 1]
+def mix_columns(blocks):
+    mixed_blocks = []
+    for block in blocks:
+        mixed_block = bytearray(block)
+        for i in range(0, 16, 4):
+            a = mixed_block[i]
+            b = mixed_block[i + 1]
+            c = mixed_block[i + 2]
+            d = mixed_block[i + 3]
 
-    print(blocos_16)
-    novos_blocos = []
-    for block in blocos_16:
-        mixed_block = [0] * 16
+            mixed_block[i] = ((2 * a) ^ (3 * b) ^ c ^ d) & 0xFF
+            mixed_block[i + 1] = (a ^ (2 * b) ^ (3 * c) ^ d) & 0xFF
+            mixed_block[i + 2] = (a ^ b ^ (2 * c) ^ (3 * d)) & 0xFF
+            mixed_block[i + 3] = ((3 * a) ^ b ^ c ^ (2 * d)) & 0xFF
 
-        for col in range(4):
-            s0 = block[col]
-            s1 = block[col + 4]
-            s2 = block[col + 8]
-            s3 = block[col + 12]
-
-            mixed_block[col] = (mul2[s0 >> 4] ^ mul3[s1 >> 4] ^ s2 ^ s3)
-            mixed_block[col + 4] = (s0 ^ mul2[s1 >> 4] ^ mul3[s2 >> 4] ^ s3)
-            mixed_block[col + 8] = (s0 ^ s1 ^ mul2[s2 >> 4] ^ mul3[s3 >> 4])
-            mixed_block[col + 12] = (mul3[s0 >> 4] ^ s1 ^ s2 ^ mul2[s3 >> 4])
-        novos_blocos.append(mixed_block)
-    print(novos_blocos)
-    return novos_blocos
+        mixed_blocks.append(bytes(mixed_block))
+    return mixed_blocks
 
 ########################################################################################################################
 ################################################# Interface Usuario ####################################################
 ########################################################################################################################
 
-# parte 1
-chave_gerada = gerador_chave()
 if (int(input("1- texto já gravado\n2- digitar texto\n")) == 2):
     texto_bytes = bytes(input("Digite aqui o texto a ser criptografado:\n"), 'utf-8')
 else:
     texto_bytes = b'0123456789abcdefghijklmno'
-blocos_16 = dividir_blocos_16_bytes(texto_bytes)
-lista_chaves = expancao_chave(chave_gerada)
-sub_bytes(blocos_16)
-add_round_key(blocos_16, lista_chaves[0])
-shift_rows_alt(blocos_16)
-mix_columns(blocos_16)
-print("Essa é a sua chave gerada:", chave_gerada)
-print(texto_bytes)
-print(blocos_16)
-print(lista_chaves)
+
+chave_gerada = gerador_chave()
+subchaves = expancao_chave(chave_gerada)
+
+bloco_16 = dividir_blocos_16_bytes(texto_bytes)
+block = add_round_key(bloco_16, subchaves[0])
+
+for i in range(10):
+        block = sub_bytes(block)
+        block = shift_rows_alt(block)
+        if (i == 9):
+            block = mix_columns(block)
+        block = add_round_key(block, subchaves[i+1])
+
+texto_cifrado = b''.join(block)
+
+print("Chave gerada:", chave_gerada)
+print("Chaves da expanção:", subchaves)
+print("Texto cifrado:", texto_cifrado)
