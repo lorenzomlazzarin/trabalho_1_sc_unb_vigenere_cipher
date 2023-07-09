@@ -55,4 +55,4 @@ Repositorio: https://github.com/lorenzomlazzarin/trabalhos_sc_unb_2023-1
 
 ### Observação
 
-### Dicas
+* A cifra RSA não está implementada da melhor forma possivel, com isso estou falando de eficiencia.
