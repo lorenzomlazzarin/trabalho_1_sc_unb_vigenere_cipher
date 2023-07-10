@@ -52,7 +52,8 @@ Repositorio: https://github.com/lorenzomlazzarin/trabalhos_sc_unb_2023-1
 
 * Código execultado no sistema operacional windows 10 e 11 com o PyCharm Community Edition 2023.1.
 * Python 3.10.
+* No arquivo AES apertamos para execultar simplesmeste, enquanto na cifra RSA podemos rodar apartir do run.py.
 
 ### Observação
 
-* A cifra RSA não está implementada da melhor forma possivel, com isso estou falando de eficiencia.
+* A cifra RSA não está implementada da melhor forma possivel.
