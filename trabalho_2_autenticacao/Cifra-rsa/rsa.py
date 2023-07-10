@@ -190,7 +190,7 @@ class RSA(MillerRabin):
 
 if __name__ == '__main__':
   ras = RSA(keyLen=8)
-  message = "Igosr Cardoso 123"
+  message = "Teste 123"
 
   print('Message: ', message, '\n')
 
